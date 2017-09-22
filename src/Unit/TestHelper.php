@@ -24,7 +24,9 @@ class TestHelper
     public static function assertMatchesActual(array $expected, array $actual)
     {
         foreach ($expected as $key => $value) {
-            if ( ! isset($actual[$key]) || $actual[$key] !== $value) {
+            if ( ! isset($actual[$key])) {
+                throw new \PHPUnit_Framework_ExpectationFailedException("Expected index '{$key}' does not exist.");
+            } elseif ($actual[$key] !== $value) {
                 throw new \PHPUnit_Framework_ExpectationFailedException("Expected value for '{$key}' does not match: got {$actual[$key]}, but expected {$value}");
             }
         }
