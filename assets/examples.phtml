@@ -1,0 +1,50 @@
+<?php
+/**
+ * Examples test.
+ *
+ * @var array $results - An array of test results.
+ * @var array $headers - An array of column headers.
+ */
+?><!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PHP Name Parser | Unit Tests</title>
+    <link rel="stylesheet" type="text/css" href="assets/style.css">
+  </head>
+  <body>
+    <div class="wrapper">
+      <table class="unit-tests">
+        <thead>
+          <tr>
+            <th>Full Name</th>
+            <?php foreach ($headers as $column): ?>
+              <th><?= ucfirst($column); ?></th>
+            <?php endforeach; ?>
+            <th>Passed</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php foreach ($results as $name => $result): ?>
+          <tr class="<?= ($result['passed']) ? 'pass' : 'fail'; ?>">
+            <td><?= $name; ?></td>
+            <?php foreach ($headers as $column): ?>
+              <td><?= (isset($result['split'][$column])) ? $result['split'][$column] : ''; ?></td>
+            <?php endforeach; ?>
+            <td><?= ($result['passed']) ? 'PASS' : 'FAIL'; ?></td>
+            <?php if ( ! $result['passed']): ?>
+              <tr class="debug-expected">
+                <td>Expected:</td>
+                <?php foreach ($headers as $column): ?>
+                  <td><?= (isset($result['expected'][$column])) ? $result['expected'][$column] : ''; ?></td>
+                <?php endforeach; ?>
+                <td></td>
+              </tr>
+            <?php endif; ?>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>
