@@ -36,6 +36,21 @@ class NamesProvider
             "lname"      => "Hunt",
             "suffix"     => "",
         ),
+        "JB Hunt" => array(
+            "salutation" => "",
+            "fname"      => "JB",
+            "initials"   => "",
+            "lname"      => "Hunt",
+            "suffix"     => "",
+        ),
+        "Jimmy (Bubba Junior) Smith" => array(
+            "nickname"   => "Bubba Junior",
+            "salutation" => "",
+            "fname"      => "Jimmy",
+            "initials"   => "",
+            "lname"      => "Smith",
+            "suffix"     => "",
+        ),
         "Edward Senior III" => array(
             "salutation" => "",
             "fname"      => "Edward",
@@ -308,23 +323,6 @@ class NamesProvider
             "fname"      => "Joshua",
             "initials"   => "",
             "lname"      => "Fraser",
-            "suffix"     => "",
-        ),
-        // fails. both initials should be capitalized
-        "JB Hunt" => array(
-            "salutation" => "",
-            "fname"      => "JB",
-            "initials"   => "",
-            "lname"      => "Hunt",
-            "suffix"     => "",
-        ),
-        // fails.  doesn't handle multiple words inside parenthesis
-        "Jimmy (Bubba Junior) Smith" => array(
-            "nickname"   => "Bubba Junior",
-            "salutation" => "",
-            "fname"      => "Jimmy",
-            "initials"   => "",
-            "lname"      => "Smith",
             "suffix"     => "",
         ),
         // fails.  should normalize the PhD suffix
