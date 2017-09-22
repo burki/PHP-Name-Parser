@@ -1,12 +1,14 @@
 {
     "name": "sgauna/php-name-parser",
     "description": "A fork of joshfraser/php-name-parser; a PHP library to split names into their respective components (first, last, etc)",
+    "type": "library",
+    "license": "Apache-2.0",
     "require": {
         "php": "^5.3.3 || ^7.0"
     },
     "autoload": {
-        "files": [
-            "parser.php"
-        ]
+        "psr-4": {
+            "joshfraser\\": "src/"
+        }
     }
 }
