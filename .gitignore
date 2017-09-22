@@ -1,3 +1,3 @@
-.idea
-vendor
-tests/logs
+.idea/
+vendor/
+tests/logs/
