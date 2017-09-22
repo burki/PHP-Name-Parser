@@ -5,21 +5,31 @@ PHP library to split names into their respective components.  Besides detecting 
 
 **Usage:**
 
-    include("parser.php");
+    // Include the composer autoloader.
+    include("vendor/autoload.php");
+    
+    // Import the class.
+    use joshfraser\FullNameParser;
 
+    // Create an instance.
     $parser = new FullNameParser();
     $parser->parse_name("Mr Anthony R Von Fange III");
 
+    // Or call statically.
+    FullNameParser::parse("Mr Anthony R Von Fange III");
+    
+
 **Results:**
 
-    Array (
-    	[nickname] =>
-        [salutation] => Mr.
-        [fname] => Anthony
-        [initials] => R
-        [lname] => Von Fange
-        [suffix] => III
-    )
+    array(7) {
+      ["salutation"]     => string(3) "Mr."
+      ["fname"]          => string(7) "Anthony"
+      ["initials"]       => string(1) "R"
+      ["lname"]          => string(9) "Von Fange"
+      ["lname_base"]     => string(5) "Fange"
+      ["lname_compound"] => string(3) "Von"
+      ["suffix"]         => string(3) "III"
+    }
 
 **The algorithm:**
 
