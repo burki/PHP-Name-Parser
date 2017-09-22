@@ -1,6 +1,6 @@
 {
-    "name": "joshfraser/php-name-parser",
-    "description": "PHP library to split names into their respective components (first, last, etc)",
+    "name": "sgauna/php-name-parser",
+    "description": "A fork of joshfraser/php-name-parser; a PHP library to split names into their respective components (first, last, etc)",
     "require": {
         "php": "^5.3.3 || ^7.0"
     },
