@@ -1,5 +1,7 @@
 <?php
 
+use joshfraser\FullNameParser;
+
 class FullNameParserTest extends PHPUnit_Framework_TestCase
 {
 
@@ -8,17 +10,17 @@ class FullNameParserTest extends PHPUnit_Framework_TestCase
     {
         $parser = new FullNameParser();
 
-        $tests = [
+        $tests = array(
             'Smarty Pants Phd' => 'Phd',
             'Smarty Pants PHD' => 'PHD',
             'OLD MACDONALD, PHD' => 'PHD',
-        ];
+        );
 
-        $tests_no_match = [
+        $tests_no_match = array(
             'OLD MACDONALD',
             'OLD PHDMACDONALDPHD',
             'Prof. Ron Brown',
-        ];
+        );
 
         foreach ($tests as $test => $expected_result) {
             $suffixes = $parser->get_pro_suffix($test);
