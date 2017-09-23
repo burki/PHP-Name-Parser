@@ -1,0 +1,14 @@
+language: php
+
+php:
+  - 5.3
+  - 7.0
+
+sudo: false
+
+before_install:
+  - composer self-update
+  - composer clear-cache
+
+notifications:
+  email: false
