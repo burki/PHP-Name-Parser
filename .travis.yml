@@ -6,9 +6,5 @@ php:
 
 sudo: false
 
-before_install:
-  - composer self-update
-  - composer clear-cache
-
 notifications:
   email: false
