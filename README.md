@@ -1,4 +1,4 @@
-PHP-Name-Parser
+PHP-Name-Parser [![Build Status](https://travis-ci.org/sgauna-rsk/PHP-Name-Parser.svg?branch=master)](https://travis-ci.org/sgauna-rsk/PHP-Name-Parser)
 ===============
 
 PHP library to split names into their respective components.  Besides detecting first and last names, this library attempts to handle prefixes, suffixes, initials and compound last names like "Von Fange".  It also normalizes prefixes (Mister -> Mr.) and fixes capitalization (JOHN SMITH -> John Smith).
