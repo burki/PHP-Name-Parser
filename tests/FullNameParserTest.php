@@ -14,7 +14,7 @@ class FullNameParserTest extends TestCase
     /**
      * Unit test for names.
      *
-     * @dataProvider joshfraser\Unit\NamesProvider::getUnitWorkingNames
+     * @dataProvider joshfraser\Unit\Providers\NamesProvider::getUnitWorkingNames
      *
      * @param string $name
      * @param array $expected
@@ -28,7 +28,7 @@ class FullNameParserTest extends TestCase
     /**
      * Test known failing names.
      *
-     * @dataProvider joshfraser\Unit\NamesProvider::getUnitFailingNames
+     * @dataProvider joshfraser\Unit\Providers\NamesProvider::getUnitFailingNames
      *
      * @param string $name
      * @param array $expected

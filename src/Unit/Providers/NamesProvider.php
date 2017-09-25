@@ -1,13 +1,13 @@
 <?php
 
-namespace joshfraser\Unit;
+namespace joshfraser\Unit\Providers;
 
 /**
  * @class NamesProvider
  *
  * List names that should be used in unit testing here.
  *
- * @package joshfraser\Unit
+ * @package joshfraser\Unit\Providers
  */
 class NamesProvider
 {
