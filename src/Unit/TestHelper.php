@@ -3,6 +3,7 @@
 namespace joshfraser\Unit;
 
 use joshfraser\FullNameParser;
+use PHPUnit_Framework_Assert;
 
 /**
  * @class TestHelper
@@ -11,7 +12,7 @@ use joshfraser\FullNameParser;
  *
  * @package joshfraser\Unit
  */
-class TestHelper
+class TestHelper extends PHPUnit_Framework_Assert
 {
     /**
      * Check if an expected array matches the actual results.
@@ -24,11 +25,8 @@ class TestHelper
     public static function assertMatchesActual(array $expected, array $actual)
     {
         foreach ($expected as $key => $value) {
-            if ( ! isset($actual[$key])) {
-                throw new \PHPUnit_Framework_ExpectationFailedException("Expected index '{$key}' does not exist.");
-            } elseif ($actual[$key] !== $value) {
-                throw new \PHPUnit_Framework_ExpectationFailedException("Expected value for '{$key}' does not match: got {$actual[$key]}, but expected {$value}");
-            }
+            self::assertArrayHasKey($key, $actual, "Expected index '{$key}' does not exist.");
+            self::assertEquals($value, $actual[$key], "Expected value for '{$key}' does not match: got {$actual[$key]}, but expected {$value}");
         }
     }
 
