@@ -56,10 +56,14 @@ class NameParsingTest extends FullNameParserTestCase
     }
 
     /**
+     * Test known working professions.
+     *
      * @dataProvider \joshfraser\Unit\Providers\SuffixProvider::getWorkingProfessions()
      *
-     * @param $name
-     * @param $expected
+     * @param string $name
+     * @param array $expected
+     *
+     * @return void
      */
     public function testWorkingProfessions($name, $expected)
     {
@@ -69,9 +73,13 @@ class NameParsingTest extends FullNameParserTestCase
     }
 
     /**
+     * Test known failing professions.
+     *
      * @dataProvider \joshfraser\Unit\Providers\SuffixProvider::getFailingProfessions()
      *
-     * @param $name
+     * @param string $name
+     *
+     * @return void
      */
     public function testFailingProfessions($name)
     {
