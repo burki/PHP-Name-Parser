@@ -77,6 +77,6 @@ class NameParsingTest extends FullNameParserTestCase
     {
         $parsed = self::$parser->get_pro_suffix($name);
 
-        $this->assertParseMatches($parsed, array());
+        $this->assertEmpty($parsed);
     }
 }
