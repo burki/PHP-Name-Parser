@@ -3,7 +3,7 @@
 namespace joshfraser;
 
 use joshfraser\Dictionary\DictionaryFactory;
-use joshfraser\Dictionary\DictionaryInterface;
+use joshfraser\Dictionary\DictionaryAbstract;
 use joshfraser\Dictionary\Exception\InvalidDictionaryException;
 
 /**
@@ -28,31 +28,30 @@ use joshfraser\Dictionary\Exception\InvalidDictionaryException;
 class FullNameParser
 {
     /**
-     * @var DictionaryInterface - The dictionary we'll use.
+     * @var DictionaryAbstract - The dictionary we'll use.
      */
     protected $dictionary;
 
     /**
+     * @var array
+     */
+    protected $not_nicknames = array("(hons)");
+
+    /**
      * FullNameParser constructor.
      *
-     * @param string|DictionaryInterface $lang
+     * @param string|DictionaryAbstract $lang
      *   You can either pass a language code or a dictionary instance here.
      */
     public function __construct($lang = 'en-US')
     {
         $this->loadDictionary($lang);
-
-        // Backwards compatibility for now.
-        $this->dict['prefix'] = $this->dictionary->getPrefixes();
-        $this->dict['suffixes'] = $this->dictionary->getSuffixes();
-        $this->dict['compound'] = $this->dictionary->getCompound();
-        $this->dict['vowels'] = $this->dictionary->getVowels();
     }
 
     /**
      * Load a dictionary from an instance of language code.
      *
-     * @param string|DictionaryInterface $lang
+     * @param string|DictionaryAbstract $lang
      *
      * @throws InvalidDictionaryException
      * @returns void
@@ -60,47 +59,34 @@ class FullNameParser
     public function loadDictionary($lang)
     {
         // Lang is either a language code string (like 'en-US') or an instance of
-        // a class that implements the DictionaryInterface.
+        // a class that implements the DictionaryAbstract.
         if (is_string($lang)) {
             $dictionary = DictionaryFactory::get($lang);
             if ( ! $dictionary) {
-                throw new InvalidDictionaryException('A dictionary for ' . $lang . ' could not be found.');
+                throw new InvalidDictionaryException("A dictionary for {$lang} could not be found.");
             }
             $this->dictionary = $dictionary;
-        } elseif ($lang instanceof DictionaryInterface) {
+        } elseif ($lang instanceof DictionaryAbstract) {
             $this->dictionary = $lang;
         } else {
-            throw new InvalidDictionaryException('Argument 1 must be either a string or an instance that implements the DictionaryInterface interface.');
+            throw new InvalidDictionaryException('Argument 1 must be either a string or an instance that implements the DictionaryAbstract class.');
         }
     }
 
-  /**
-   * Create the dictionary of terms for use later
-   *
-   *  - Common honorific prefixes (english)
-   *  - Common compound surname identifiers
-   *  - Common suffixes (lineage and professional)
-   * Note: longer professional titles should appear earlier in the array than shorter titles to reduce the risk of mis-identification e.g. BEng before BE
-   * Also note that case and periods are part of the matching for professional titles and therefore need to be correct, there are no case conversions
-   */
-  protected $dict = array(
-      'prefix'   => array(),
-      'compound' => array(),
-      'suffixes' => array(),
-      'vowels'   => array(),
-  );
-
-  protected $not_nicknames = array( "(hons)");
-
-
-  /**
-   * Parse Static entry point.
-   *
-   * @param string $name the full name you wish to parse
-   * @return array returns associative array of name parts
-   */
-  public static function parse($name) {
-    $parser = new self();
+    /**
+     * Parse Static entry point.
+     *
+     * @param string $name
+     *   The full name you wish to parse.
+     * @param string $lang_code
+     *   The language code for parsing this name.
+     *
+     * @return array
+     *   Returns associative array of name parts.
+     */
+  public static function parse($name, $lang_code = 'en-US')
+  {
+    $parser = new self($lang_code);
     return $parser->parse_name($name);
   }
 
@@ -113,17 +99,17 @@ class FullNameParser
    */
   public function parse_name($full_name) {
 
-    # Remove leading/trailing whitespace
+    // Remove leading/trailing whitespace
     $full_name = trim($full_name);
 
     // remove any words that don't add value
     // $full_name = str_replace("(Hons)", '', $full_name );
     // $full_name = str_replace("(hons)", '', $full_name );
 
-    # Setup default vars
-    extract(array('salutation' => '', 'fname' => '', 'initials' => '', 'lname' => '', 'lname_base' => '', 'lname_compound' => '', 'suffix' => ''));
+    // Setup default vars
+    $salutation = $fname = $initials = $lname = $lname_base = $lname_compound = $suffix = '';
 
-    # Find all the professional suffixes possible
+    // Find all the professional suffixes possible
     $professional_suffix = $this->get_pro_suffix($full_name);
 
     // The position of the first professional suffix denotes the end of the name and the start of suffixes
@@ -145,21 +131,21 @@ class FullNameParser
     // remove the suffixes from the full_name
     $full_name = mb_substr($full_name, 0, $first_suffix_index);
 
-    # Deal with nickname, push to array
+    // Deal with nickname, push to array
     $has_nick = $this->get_nickname($full_name);
     if ($has_nick) {
-      # Remove wrapper chars from around nickname
+      // Remove wrapper chars from around nickname
       $name['nickname'] = mb_substr($has_nick, 1, (mb_strlen($has_nick) - 2));
-      # Remove the nickname from the full name
+      // Remove the nickname from the full name
       $full_name = str_replace($has_nick, '', $full_name);
-      # Get rid of consecutive spaces left by the removal
+      // Get rid of consecutive spaces left by the removal
       $full_name = str_replace('  ', ' ', $full_name);
     }
     
-    # Grab a list of words from the remainder of the full name
+    // Grab a list of words from the remainder of the full name
     $unfiltered_name_parts = $this->break_words($full_name);
 
-    # Is first word a title or multiple titles consecutively?
+    // Is first word a title or multiple titles consecutively?
     if( count($unfiltered_name_parts)) {
       // only start looking if there are any words left in the name to process
       while (count($unfiltered_name_parts) > 0 && $s = $this->is_salutation($unfiltered_name_parts[0])) {
@@ -168,8 +154,8 @@ class FullNameParser
       }
       $salutation = trim($salutation);
       // Find if there is a line suffix, if so then move it out
-      # Is last word a suffix or multiple suffixes consecutively?
-      while (count($unfiltered_name_parts) > 0 && $s = $this->is_line_suffix($unfiltered_name_parts[count($unfiltered_name_parts)-1], $full_name)) {
+      // Is last word a suffix or multiple suffixes consecutively?
+      while (count($unfiltered_name_parts) > 0 && $s = $this->isLineage($unfiltered_name_parts[count($unfiltered_name_parts)-1], $full_name)) {
         if( $suffix != "") {
           $suffix = $s.", ".$suffix;
         } else {
@@ -200,25 +186,25 @@ class FullNameParser
     }
     $unfiltered_name_parts = $name_arr;
 
-    # set the ending range after prefix/suffix trim
+    // set the ending range after prefix/suffix trim
     $end = count($unfiltered_name_parts);
 
-    # concat the first name
+    // concat the first name
     for ($i=0; $i<$end-1; $i++) {
       $word = $unfiltered_name_parts[$i];
-      # move on to parsing the last name if we find an indicator of a compound last name (Von, Van, etc)
-      # we use $i != 0 to allow for rare cases where an indicator is actually the first name (like "Von Fabella")
+      // move on to parsing the last name if we find an indicator of a compound last name (Von, Van, etc)
+      // we use $i != 0 to allow for rare cases where an indicator is actually the first name (like "Von Fabella")
       if ($this->is_compound($word) && $i != 0) {
         break;
       }
-      # is it a middle initial or part of their first name?
-      # if we start off with an initial, we'll call it the first name
+      // is it a middle initial or part of their first name?
+      // if we start off with an initial, we'll call it the first name
       if ($this->is_initial($word)) {
-        # is the initial the first word?
+        // is the initial the first word?
         if ($i == 0) {
-          # if so, do a look-ahead to see if they go by their middle name
-          # for ex: "R. Jason Smith" => "Jason Smith" & "R." is stored as an initial
-          # but "R. J. Smith" => "R. Smith" and "J." is stored as an initial
+          // if so, do a look-ahead to see if they go by their middle name
+          // for ex: "R. Jason Smith" => "Jason Smith" & "R." is stored as an initial
+          // but "R. J. Smith" => "R. Smith" and "J." is stored as an initial
           if ($this->is_initial($unfiltered_name_parts[$i+1])) {
             $fname .= " ".mb_strtoupper($word);
           }
@@ -226,7 +212,7 @@ class FullNameParser
             $initials .= " ".mb_strtoupper($word);
           }
         }
-        # otherwise, just go ahead and save the initial
+        // otherwise, just go ahead and save the initial
         else {
           $initials .= " ".mb_strtoupper($word);
         }
@@ -237,10 +223,10 @@ class FullNameParser
     }
 
     if( count($unfiltered_name_parts)) {
-      # check that we have more than 1 word in our string
+      // check that we have more than 1 word in our string
       if ($end-0 > 1) {
-        # concat the last name and split last name in base and compound
-        for ($i; $i < $end; $i++) {
+        // concat the last name and split last name in base and compound
+        for (; $i < $end; $i++) {
           if ($this->is_compound($unfiltered_name_parts[$i])) {
             $lname_compound .= " ".$unfiltered_name_parts[$i];
           } else {
@@ -250,14 +236,14 @@ class FullNameParser
         }
       }
       else {
-        # otherwise, single word strings are assumed to be first names
+        // otherwise, single word strings are assumed to be first names
         $fname = $this->fix_case($unfiltered_name_parts[$i]);
       }
     } else {
       $fname = "";
     }
 
-    # return the various parts in an array
+    // return the various parts in an array
     $name['salutation'] = $salutation;
     $name['fname'] = trim($fname);
     $name['initials'] = trim($initials);
@@ -298,7 +284,7 @@ class FullNameParser
   public function get_pro_suffix($name) {
 
     $found_suffix_arr = array();
-    foreach ($this->dict['suffixes']['prof'] as $suffix) {
+    foreach ($this->dictionary->professions as $suffix) {
       if (preg_match('/[,\s]+'.preg_quote($suffix).'\b/i', $name, $matches)) {
         $found_suffix = trim($matches[0]);
         $found_suffix = rtrim($found_suffix,',');
@@ -343,35 +329,35 @@ class FullNameParser
    * @param string $name full name for context in determining edge-cases
    * @return mixed boolean if false, string if true (returns suffix)
    */
-  protected function is_line_suffix($word, $name) {
+  protected function isLineage($word, $name) {
 
-    # Ignore periods and righ commas, normalize case
+    // Ignore periods and right commas, normalize case
     $word = str_replace('.', '', mb_strtolower($word));
     $word = rtrim($word,',');
 
-    # Search the array for our word
-    $line_match = array_search($word, array_map('mb_strtolower', $this->dict['suffixes']['line']));
+    // Search the array for our word
+    $line_match = array_search($word, array_map('mb_strtolower', $this->dictionary->lineages));
 
-    # Now test our edge cases based on lineage
+    // Now test our edge cases based on lineage
     if ($line_match !== false) {
-      # Store our match
-      $matched_case = $this->dict['suffixes']['line'][$line_match];
+      // Store our match
+      $matched_case = $this->dictionary->lineages[$line_match];
 
-      # Remove it from the array
-      $temp_array = $this->dict['suffixes']['line'];
+      // Remove it from the array
+      $temp_array = $this->dictionary->lineages;
       unset($temp_array[$line_match]);
 
-      # Make sure we're dealing with the suffix and not a surname
+      // Make sure we're dealing with the suffix and not a surname
       if ($word == 'senior' || $word == 'junior') {
 
-        # If name is Joshua Senior, it's pretty likely that Senior is the surname
-        # However, if the name is Joshua Jones Senior, then it's likely a suffix
+        // If name is Joshua Senior, it's pretty likely that Senior is the surname
+        // However, if the name is Joshua Jones Senior, then it's likely a suffix
         if ($this->mb_str_word_count($name) < 3) {
           return false;
         }
 
-        # If the word Junior or Senior is contained, but so is some other
-        # lineage suffix, then the word is likely a surname and not a suffix
+        // If the word Junior or Senior is contained, but so is some other
+        // lineage suffix, then the word is likely a surname and not a suffix
         foreach ($temp_array as $suffix) {
           if (preg_match("/\b".$suffix."\b/i", $name)) {
             return false;
@@ -393,7 +379,7 @@ class FullNameParser
    */
   protected function is_salutation($word) {
     $word = str_replace('.', '', mb_strtolower($word));
-    foreach ($this->dict['prefix'] as $replace => $originals) {
+    foreach ($this->dictionary->prefixes as $replace => $originals) {
       if (in_array($word, $originals)) {
         return $replace;
       }
@@ -410,7 +396,7 @@ class FullNameParser
    * @return boolean
    */
   protected function is_compound($word) {
-    return in_array(mb_strtolower($word), $this->dict['compound']);
+    return in_array(mb_strtolower($word), $this->dictionary->compound);
   }
 
 
@@ -440,46 +426,46 @@ class FullNameParser
     return false;
   }
 
-  # ucfirst words split by dashes or periods
-  # ucfirst all upper/lower strings, but leave camelcase words alone
+  // ucfirst words split by dashes or periods
+  // ucfirst all upper/lower strings, but leave camelcase words alone
   public function fix_case($word) {
 
-    # Fix case for words split by periods (J.P.)
+    // Fix case for words split by periods (J.P.)
     if (mb_strpos($word, '.') !== false) {
       $word = $this->safe_ucfirst(".", $word);;
     }
 
-    # Fix case for words split by hyphens (Kimura-Fay)
+    // Fix case for words split by hyphens (Kimura-Fay)
     if (mb_strpos($word, '-') !== false) {
       $word = $this->safe_ucfirst("-", $word);
     }
 
-    # Special case for single letters
+    // Special case for single letters
     if (mb_strlen($word) == 1) {
       $word = mb_strtoupper($word);
     }
 
-    # Special case for 2-letter words
+    // Special case for 2-letter words
     if (mb_strlen($word) == 2) {
-      # Both letters vowels (uppercase both)
-      if (in_array(mb_strtolower($word{0}), $this->dict['vowels']) && in_array(mb_strtolower($word{1}), $this->dict['vowels'])) {
+      // Both letters vowels (uppercase both)
+      if (in_array(mb_strtolower($word{0}), $this->dictionary->vowels) && in_array(mb_strtolower($word{1}), $this->dictionary->vowels)) {
         $word = mb_strtoupper($word);
       }
-      # Both letters consonants (uppercase both)
-      if (!in_array(mb_strtolower($word{0}), $this->dict['vowels']) && !in_array(mb_strtolower($word{1}), $this->dict['vowels'])) {
+      // Both letters consonants (uppercase both)
+      if (!in_array(mb_strtolower($word{0}), $this->dictionary->vowels) && !in_array(mb_strtolower($word{1}), $this->dictionary->vowels)) {
         $word = mb_strtoupper($word);
       }
-      # First letter is vowel, second letter consonant (uppercase first)
-      if (in_array(mb_strtolower($word{0}), $this->dict['vowels']) && !in_array(mb_strtolower($word{1}), $this->dict['vowels'])) {
+      // First letter is vowel, second letter consonant (uppercase first)
+      if (in_array(mb_strtolower($word{0}), $this->dictionary->vowels) && !in_array(mb_strtolower($word{1}), $this->dictionary->vowels)) {
         $word = $this->mb_ucfirst(mb_strtolower($word));
       }
-      # First letter consonant, second letter vowel or "y" (uppercase first)
-      if (!in_array(mb_strtolower($word{0}), $this->dict['vowels']) && (in_array(mb_strtolower($word{1}), $this->dict['vowels']) || mb_strtolower($word{1}) == 'y')) {
+      // First letter consonant, second letter vowel or "y" (uppercase first)
+      if (!in_array(mb_strtolower($word{0}), $this->dictionary->vowels) && (in_array(mb_strtolower($word{1}), $this->dictionary->vowels) || mb_strtolower($word{1}) == 'y')) {
         $word = $this->mb_ucfirst(mb_strtolower($word));
       }
     }
 
-    # Fix case for words which aren't initials, but are all uppercase or lowercase
+    // Fix case for words which aren't initials, but are all uppercase or lowercase
     if ( (mb_strlen($word) >= 3) && ($this->mb_ctype_upper($word) || $this->mb_ctype_lower($word)) ) {
       $word = $this->mb_ucfirst(mb_strtolower($word));
     }
@@ -487,35 +473,36 @@ class FullNameParser
     return $word;
   }
 
-  # helper public function for fix_case
-  public function safe_ucfirst($seperator, $word) {
-    # uppercase words split by the seperator (ex. dashes or periods)
-    $parts = explode($seperator, $word);
+  // helper public function for fix_case
+  public function safe_ucfirst($separator, $word) {
+    // uppercase words split by the separator (ex. dashes or periods)
+    $parts = explode($separator, $word);
+    $words = array();
     foreach ($parts as $word) {
       $words[] = ($this->is_camel_case($word)) ? $word : $this->mb_ucfirst(mb_strtolower($word));
     }
-    return implode($seperator, $words);
+    return implode($separator, $words);
   }
 
-    # helper public function for multibytes ctype_alpha
+    // helper public function for multibytes ctype_alpha
     public function mb_ctype_alpha($text)
     {
-      return (bool)preg_match('/^\p{L}*$/', $text);
+      return (bool) preg_match('/^\p{L}*$/', $text);
     }
 
-    # helper public function for multibytes ctype_lower
+    // helper public function for multibytes ctype_lower
     public function mb_ctype_lower($text)
     {
-      return (bool)preg_match('/^\p{Ll}*$/', $text);
+      return (bool) preg_match('/^\p{Ll}*$/', $text);
     }
 
-    # helper public function for multibytes ctype_upper
+    // helper public function for multibytes ctype_upper
     public function mb_ctype_upper($text)
     {
       return (bool)preg_match('/^\p{Lu}*$/', $text);
     }
 
-    # helper public function for multibytes str_word_count
+    // helper public function for multibytes str_word_count
     public function mb_str_word_count($text)
     {
       if (empty($text)) {
@@ -525,7 +512,7 @@ class FullNameParser
       }
     }
 
-    # helper public function for multibytes ucfirst
+    // helper public function for multibytes ucfirst
     public function mb_ucfirst($string)
     {
       $strlen = mb_strlen($string);
