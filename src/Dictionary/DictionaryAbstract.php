@@ -2,7 +2,19 @@
 
 namespace joshfraser\Dictionary;
 
-abstract class DictionaryAbstract implements DictionaryInterface
+/**
+ * Class DictionaryAbstract
+ *
+ * @package joshfraser\Dictionary
+ *
+ * The following properties are accessible via magic methods:
+ * @property array $prefixes
+ * @property array $lineages
+ * @property array $professions
+ * @property array $compound
+ * @property array $vowels
+ */
+abstract class DictionaryAbstract
 {
     /**
      * @var string - Child classes should override this, for example "English".
@@ -14,19 +26,34 @@ abstract class DictionaryAbstract implements DictionaryInterface
     const CODE = null;
 
     /**
-     * @var array - Dictionary prefixes.
+     * @var array $readable
+     *   List of internal properties that can be seen externally via magic methods.
+     */
+    protected $readable = array(
+        'prefixes',
+        'lineages',
+        'professions',
+        'compound',
+        'vowels',
+    );
+    /**
+     * @var array - Dictionary prefixes, honorifics, and titles.
      */
     protected $prefixes = array();
     /**
-     * @var array - Dictionary suffixes.
+     * @var array - List of lineage suffixes.
      */
-    protected $suffixes = array();
+    protected $lineages = array();
     /**
-     * @var array - Dictionary compound words.
+     * @var array - List of profession suffixes.
+     */
+    protected $professions = array();
+    /**
+     * @var array - List of possible compound names.
      */
     protected $compound = array();
     /**
-     * @var array - Dictionary vowels.
+     * @var array - Vowels of the language.
      */
     protected $vowels = array();
 
@@ -37,7 +64,7 @@ abstract class DictionaryAbstract implements DictionaryInterface
      */
     public function getLanguage()
     {
-        return strtolower(static::LANGUAGE);
+        return mb_strtolower(static::LANGUAGE);
     }
 
     /**
@@ -47,95 +74,59 @@ abstract class DictionaryAbstract implements DictionaryInterface
      */
     public function getLanguageCode()
     {
-        return strtolower(static::CODE);
+        return mb_strtolower(static::CODE);
     }
 
     /**
-     * Get the prefixes of the dictionary or a specific prefix.
+     * Implements magic __get() method.
      *
-     * @param string $search [optional]
-     *   Search for a specific item and return that.
+     * @param string $name
      *
-     * @return array|string|null
-     *   A string is returned if $search is specified and found.
-     *   Null is returned if $search is specified, but not found.
-     *   An array is returned if $search is not specified or null.
+     * @return mixed|null
+     *   Null is returned if the property being accessed is not listed within the
+     *   $readable property.
      */
-    public function getPrefixes($search = null)
+    public function __get($name)
     {
-        return $this->get('prefixes', $search);
+        return in_array($name, $this->readable)
+            ? $this->{$name}
+            : null;
     }
 
     /**
-     * Get the suffixes of the dictionary or a specific suffix.
+     * Implements magic __isset() method.
      *
-     * @param string $search [optional]
-     *   Search for a specific item and return that.
+     * @param string $name
      *
-     * @return array|string|null
-     *   A string is returned if $search is specified and found.
-     *   Null is returned if $search is specified, but not found.
-     *   An array is returned if $search is not specified or null.
+     * @return bool
+     *   Returns true if the property being requested is listed in the $readable
+     *   array.
      */
-    public function getSuffixes($search = null)
+    public function __isset($name)
     {
-        return $this->get('suffixes', $search);
+        return in_array($name, $this->readable);
     }
 
     /**
-     * Get the compound words of the dictionary or a specific compound word.
+     * Implements magic __unset() method.
      *
-     * @param string $search [optional]
-     *   Search for a specific item and return that.
+     * External changes are not allowed, so this method does nothing.
      *
-     * @return array|string|null
-     *   A string is returned if $search is specified and found.
-     *   Null is returned if $search is specified, but not found.
-     *   An array is returned if $search is not specified or null.
+     * @param string $name
+     *
+     * @return void
      */
-    public function getCompound($search = null)
-    {
-        return $this->get('compound', $search);
-    }
+    public function __unset($name) {}
 
     /**
-     * Get the vowels of the dictionary or a specific vowel.
+     * Implements magic __set() method.
      *
-     * @param string $search [optional]
-     *   Search for a specific item and return that.
+     * External changes are not allowed, so this method does nothing.
      *
-     * @return array|string|null
-     *   A string is returned if $search is specified and found.
-     *   Null is returned if $search is specified, but not found.
-     *   An array is returned if $search is not specified or null.
+     * @param string $name
+     * @param mixed $value
+     *
+     * @return void
      */
-    public function getVowels($search = null)
-    {
-        return $this->get('vowels', $search);
-    }
-
-    /**
-     * Get a variable from a source.
-     *
-     * @param string $from
-     * @param string $search
-     *
-     * @return mixed
-     */
-    protected function get($from, $search = null)
-    {
-        $from = strtolower($from);
-        if (isset($this->{$from}) && is_array($this->{$from})) {
-            if ($search === null) {
-                return $this->{$from};
-            }
-
-            return isset($this->{$from}[$search])
-                ? $this->{$from}[$search]
-                : null;
-        }
-
-        // Invalid source specified.
-        return null;
-    }
+    public function __set($name, $value) {}
 }

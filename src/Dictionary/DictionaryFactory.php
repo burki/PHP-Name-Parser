@@ -2,6 +2,7 @@
 
 namespace joshfraser\Dictionary;
 
+use joshfraser\Dictionary\Exception\InvalidDictionaryException;
 use Prophecy\Exception\InvalidArgumentException;
 
 /**
@@ -36,22 +37,25 @@ class DictionaryFactory
      *
      * @param string $dictionary
      *   Fully-resolved path to dictionary class.  The class must implement the
-     *   DictionaryInterface interface.
+     *   DictionaryAbstract abstract.
      *
      * @return void
+     * @throws InvalidDictionaryException
      */
     public function register($dictionary)
     {
         if (is_string($dictionary) && class_exists($dictionary)) {
             $instance = new $dictionary();
-            if ($instance instanceof DictionaryInterface) {
+            if ($instance instanceof DictionaryAbstract) {
                 $code = strtolower($instance->getLanguageCode());
                 if ( ! isset($this->dictionaries[$code])) {
                     $this->dictionaries[$code] = $dictionary;
                 }
             } else {
-                throw new InvalidArgumentException($dictionary . ' is not a valid dictionary class.');
+                throw new InvalidArgumentException($dictionary . ' must extend the DictionaryAbstract class.');
             }
+        } else {
+            throw new InvalidDictionaryException($dictionary . ' is not a valid class or could not be found.');
         }
     }
 
@@ -77,7 +81,7 @@ class DictionaryFactory
      * @param string $language_code
      *   Language codes should be in the form of
      *
-     * @return null|DictionaryInterface
+     * @return null|DictionaryAbstract
      *   Null is returned when a dictionary could not be found.
      */
     public static function get($language_code)
