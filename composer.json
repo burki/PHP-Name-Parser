@@ -8,7 +8,8 @@
     },
     "autoload": {
         "psr-4": {
-            "joshfraser\\": "src/"
+            "joshfraser\\": "src/",
+            "joshfraser\\Unit\\": "tests/libraries"
         }
     },
     "require-dev": {
