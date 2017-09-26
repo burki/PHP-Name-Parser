@@ -14,7 +14,7 @@ class NamesProvider
     /**
      * @var array - List of known working names.
      */
-    private static $working = array(
+    protected $working = array(
         "Mr Anthony R Von Fange III" => array(
             "salutation" => "Mr.",
             "fname"      => "Anthony",
@@ -295,7 +295,7 @@ class NamesProvider
     /**
      * @var array - List of known failing names.
      */
-    private static $failing = array(
+    protected $failing = array(
         "Dale Edward Jones Senior" => array(
             "salutation" => "",
             "fname"      => "Dale Edward",
@@ -349,9 +349,9 @@ class NamesProvider
      *
      * @return array
      */
-    public static function getNames()
+    public function getNames()
     {
-        return array_merge(self::$working, self::$failing);
+        return array_merge($this->working, $this->failing);
     }
 
     /**
@@ -359,9 +359,9 @@ class NamesProvider
      *
      * @return array
      */
-    public static function getWorkingNames()
+    public function getWorkingNames()
     {
-        return self::$working;
+        return $this->working;
     }
 
     /**
@@ -369,9 +369,9 @@ class NamesProvider
      *
      * @return array
      */
-    public static function getFailingNames()
+    public function getFailingNames()
     {
-        return self::$failing;
+        return $this->failing;
     }
 
     /**
@@ -379,9 +379,9 @@ class NamesProvider
      *
      * @return array
      */
-    public static function getUnitNames()
+    public function getUnitNames()
     {
-        return self::formatForPHPUnit(self::getNames());
+        return $this->formatForPHPUnit($this->getNames());
     }
 
     /**
@@ -389,9 +389,9 @@ class NamesProvider
      *
      * @return array
      */
-    public static function getUnitWorkingNames()
+    public function getUnitWorkingNames()
     {
-        return self::formatForPHPUnit(self::getWorkingNames());
+        return $this->formatForPHPUnit($this->getWorkingNames());
     }
 
     /**
@@ -399,9 +399,9 @@ class NamesProvider
      *
      * @return array
      */
-    public static function getUnitFailingNames()
+    public function getUnitFailingNames()
     {
-        return self::formatForPHPUnit(self::getFailingNames());
+        return $this->formatForPHPUnit($this->getFailingNames());
     }
 
     /**
@@ -411,7 +411,7 @@ class NamesProvider
      *
      * @return array
      */
-    private static function formatForPHPUnit(array $array)
+    protected function formatForPHPUnit(array $array)
     {
         $data = array();
         foreach($array as $name => $expected) {

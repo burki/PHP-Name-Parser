@@ -2,11 +2,11 @@
 
 require_once(__DIR__ . '/vendor/autoload.php');
 
-use joshfraser\Unit\TestHelper;
-use joshfraser\Unit\Providers\NamesProvider;
+use joshfraser\Unit\Providers\ExampleResultsProvider;
 
+// Headers for HTML table.
 $headers = array("salutation", "fname", "initials", "lname", "suffix", "nickname");
-$results = TestHelper::getExampleResults(NamesProvider::getNames());
+$results = ExampleResultsProvider::getResults();
 
 // Render variables into template.
 include(__DIR__ . '/assets/examples.phtml');
