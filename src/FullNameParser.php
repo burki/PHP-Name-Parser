@@ -19,8 +19,8 @@ use joshfraser\Dictionary\Exception\InvalidDictionaryException;
  * Author: Josh Fraser
  *
  * Contribution from Clive Verrall www.cliveverrall.com February 2016
- * 
- * // other contributions: 
+ *
+ * // other contributions:
  * //   - eric willis [list of honorifics](http://notes.ericwillis.com/2009/11/common-name-prefixes-titles-and-honorifics/)
  * //   - `TomThak` for raising issue #16 and providing [wikepedia resource](https://cs.wikipedia.org/wiki/Akademick%C3%BD_titul)
  * //   - `atla5` for closing the issue.
@@ -141,7 +141,7 @@ class FullNameParser
       // Get rid of consecutive spaces left by the removal
       $full_name = str_replace('  ', ' ', $full_name);
     }
-    
+
     // Grab a list of words from the remainder of the full name
     $unfiltered_name_parts = $this->break_words($full_name);
 
@@ -408,7 +408,7 @@ class FullNameParser
    * @return boolean
    */
   protected function is_initial($word) {
-    return ((mb_strlen($word) == 1) || (mb_strlen($word) == 2 && $word{1} == "."));
+    return ((mb_strlen($word) == 1) || (mb_strlen($word) == 2 && $word[1] == "."));
   }
 
 
@@ -448,19 +448,19 @@ class FullNameParser
     // Special case for 2-letter words
     if (mb_strlen($word) == 2) {
       // Both letters vowels (uppercase both)
-      if (in_array(mb_strtolower($word{0}), $this->dictionary->vowels) && in_array(mb_strtolower($word{1}), $this->dictionary->vowels)) {
+      if (in_array(mb_strtolower($word[0]), $this->dictionary->vowels) && in_array(mb_strtolower($word[1]), $this->dictionary->vowels)) {
         $word = mb_strtoupper($word);
       }
       // Both letters consonants (uppercase both)
-      if (!in_array(mb_strtolower($word{0}), $this->dictionary->vowels) && !in_array(mb_strtolower($word{1}), $this->dictionary->vowels)) {
+      if (!in_array(mb_strtolower($word[0]), $this->dictionary->vowels) && !in_array(mb_strtolower($word[1]), $this->dictionary->vowels)) {
         $word = mb_strtoupper($word);
       }
       // First letter is vowel, second letter consonant (uppercase first)
-      if (in_array(mb_strtolower($word{0}), $this->dictionary->vowels) && !in_array(mb_strtolower($word{1}), $this->dictionary->vowels)) {
+      if (in_array(mb_strtolower($word[0]), $this->dictionary->vowels) && !in_array(mb_strtolower($word[1]), $this->dictionary->vowels)) {
         $word = $this->mb_ucfirst(mb_strtolower($word));
       }
       // First letter consonant, second letter vowel or "y" (uppercase first)
-      if (!in_array(mb_strtolower($word{0}), $this->dictionary->vowels) && (in_array(mb_strtolower($word{1}), $this->dictionary->vowels) || mb_strtolower($word{1}) == 'y')) {
+      if (!in_array(mb_strtolower($word[0]), $this->dictionary->vowels) && (in_array(mb_strtolower($word[1]), $this->dictionary->vowels) || mb_strtolower($word[1]) == 'y')) {
         $word = $this->mb_ucfirst(mb_strtolower($word));
       }
     }
